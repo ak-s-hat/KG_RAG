@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Secrets
+.env
+
+# DeepEval
+.deepeval/
+
+# IDEs
+.vscode/
+.idea/
+.qoder/
+
+# Data & Logs
+data/chunks.txt
+*.log

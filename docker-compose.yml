@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:5
+    container_name: neo4j_db
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    environment:
+      # IMPORTANT: Replace with your own strong password
+      NEO4J_AUTH: neo4j/hello-world
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
