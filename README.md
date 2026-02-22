@@ -8,6 +8,7 @@ A **Knowledge-Graph-based Retrieval-Augmented Generation (RAG)** system built on
 
 1. [Part 1 — How the RAG Pipeline Works](#part-1--how-the-rag-pipeline-works)
    - [System Overview](#system-overview)
+   - [Why Knowledge Graph RAG?](#why-knowledge-graph-rag)
    - [Phase 1: Document Ingestion](#phase-1-document-ingestion)
    - [Phase 2: Query & Generation](#phase-2-query--generation)
    - [Thread Isolation](#thread-isolation)
@@ -97,7 +98,16 @@ This system does not use vector similarity search. Instead, it builds a **symbol
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+### Why Knowledge Graph RAG?
+
+While traditional Vector RAG systems are effective for general semantic search, this Knowledge Graph approach offers several distinct advantages:
+
+*   **Interpretability & Debuggability**: Unlike the "black box" similarity scores of Vector DBs (e.g., 0.82), a Knowledge Graph provides a granular audit trail. If a query underperforms, you can inspect the specific `Keyword` nodes and `APPEARS_IN` relationships to identify exactly why a chunk was or wasn't retrieved.
+*   **Resilience to "Embedding Drift"**: Traditional RAG depends on an embedding model's ability to semantically "understand" technical jargon. By using symbolic NER and keyword mapping, this system ensures that if a technical term (e.g., "Informer") exists in both the query and the document, it **will** be linked, regardless of whether the term was present in the embedding model's training set.
+*   **Native Multi-Hop Reasoning**: Through `SIMILAR_TO` edges and contextual neighborhood expansion, the graph can connect entities that are physically distant in the text. This allows the system to answer complex questions requiring fact-linking (e.g., *"How does the component resolving long-term dependency interact with short-term correlations?"*)—a task where Vector RAGs often struggle due to their reliance on isolated, similar fragments.
+
 ---
+
 
 ## Phase 1: Document Ingestion
 
