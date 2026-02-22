@@ -7,18 +7,26 @@ import uuid
 from typing import List, Tuple, Optional
 from neo4j import GraphDatabase
 
+import sys
+from pathlib import Path
+
+# Add root directory to sys.path to allow running this script directly
+root_dir = str(Path(__file__).resolve().parent.parent)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 from config import (
     NEO4J_URI,
     NEO4J_USER,
     NEO4J_PASSWORD,
     NEO4J_DATABASE,
 )
-from graph_retriever2 import GraphRetriever
-from groq_client import generate_answer
-from chunker2 import chunk_pdf
-from ner_extractor import map_keywords_to_chunks
-from keyword_filter import filter_keys
-from graph_builder2 import KnowledgeGraphBuilder
+from retriever.graph_retriever2 import GraphRetriever
+from generator.groq_client import generate_answer
+from ingestion.chunker2 import chunk_pdf
+from ingestion.ner_extractor import map_keywords_to_chunks
+from ingestion.keyword_filter import filter_keys
+from ingestion.graph_builder2 import KnowledgeGraphBuilder
 
 
 # Global thread_id for evaluation - in production this would come from frontend

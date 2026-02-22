@@ -3,9 +3,16 @@ Synthetic Golden Generation from PDF using DeepEval Synthesizer.
 Generates question-answer pairs from the source PDF for evaluation.
 """
 import os
+import sys
 import json
 from typing import List, Optional
 from pathlib import Path
+
+# Add root directory to sys.path to allow running this script directly
+root_dir = str(Path(__file__).resolve().parent.parent)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 from dotenv import load_dotenv
 try:
     from deepeval.synthesizer import Synthesizer
@@ -38,7 +45,7 @@ def extract_pdf_text(pdf_path: str) -> str:
         Extracted text as string
     """
     try:
-        from chunker2 import chunk_pdf
+        from ingestion.chunker2 import chunk_pdf
         chunks = chunk_pdf(pdf_path)
         # Join all chunks into a single text
         return "\n\n".join(chunks)

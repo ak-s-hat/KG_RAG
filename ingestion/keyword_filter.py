@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# Add root directory to sys.path to allow running this script directly
+root_dir = str(Path(__file__).resolve().parent.parent)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 from typing import Dict, List, Set
 
 # --- Configuration ---

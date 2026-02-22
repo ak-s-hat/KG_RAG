@@ -3,8 +3,14 @@ RAG Evaluation Script using DeepEval Metrics.
 Evaluates the Neo4j-based knowledge graph RAG pipeline.
 """
 import os
+import sys
 from typing import List, Optional, Dict, Any
 from pathlib import Path
+
+# Add root directory to sys.path to allow running this script directly
+root_dir = str(Path(__file__).resolve().parent.parent)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
 
 try:
     from deepeval.dataset import Golden, EvaluationDataset
@@ -22,7 +28,7 @@ except ImportError:
     )
 
 from models.groq_llm import GroqLlama3
-from rag_pipeline import rag_pipeline, ingest_document
+from pipeline.rag_pipeline import rag_pipeline, ingest_document
 
 
 DEFAULT_DATASET_PATH = os.path.join(

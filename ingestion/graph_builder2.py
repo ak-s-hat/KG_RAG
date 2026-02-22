@@ -1,6 +1,14 @@
 # graph_builder.py
 
 from neo4j import GraphDatabase
+import sys
+from pathlib import Path
+
+# Add root directory to sys.path to allow running this script directly
+root_dir = str(Path(__file__).resolve().parent.parent)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 from typing import List, Dict
 from config import (
     NEO4J_URI,

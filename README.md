@@ -1,6 +1,6 @@
 # Knowledge Graph RAG Pipeline
 
-A **Knowledge-Graph-based Retrieval-Augmented Generation (RAG)** system built on Neo4j, spaCy, and Groq LLMs, with a full evaluation harness powered by [DeepEval](https://docs.confident-ai.com/).
+A **Knowledge-Graph-based Retrieval-Augmented Generation (RAG)** system built on Neo4j, spaCy, and Groq LLMs, with a full evaluation harness powered by [DeepEval](https://docs.confident-ai.com/).A RAG without any vector db and its shenanigans.
 
 ---
 
@@ -221,6 +221,9 @@ Every document ingested gets a `thread_id` (UUID or user-supplied string). All N
 
 ## Quick Start (Pipeline)
 
+> [!CAUTION]
+> **You must use the same `--thread-id` for both `ingest` and `query`.** Each document is isolated in Neo4j by its `thread_id`. If you omit it during ingest, a random UUID is generated — copy it and pass it to the query command. If the IDs don't match, the query will return **0 chunks**.
+
 ```powershell
 # 1. Start Neo4j
 docker-compose up -d
@@ -229,11 +232,11 @@ docker-compose up -d
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 
-# 3. Ingest a PDF
-python rag_pipeline.py ingest "electronics-12-02175.pdf" --thread-id paper-001
+# 3. Ingest a PDF (use a consistent --thread-id)
+python pipeline/rag_pipeline.py ingest "electronics-12-02175.pdf" --thread-id paper-001
 
-# 4. Query it
-python rag_pipeline.py query "How does LSTM compare to Informer?" --thread-id paper-001
+# 4. Query it (same --thread-id as ingest!)
+python pipeline/rag_pipeline.py query "How does LSTM compare to Informer?" --thread-id paper-001
 ```
 
 ---
@@ -472,16 +475,16 @@ This looked like a timeout problem but was actually a **semaphore-in-wrong-loop*
 ## Quick Start (Evaluation)
 
 ```powershell
-# Full pipeline: ingest + generate goldens + evaluate
-python rag_pipeline.py ingest "electronics-12-02175.pdf" --thread-id paper-001
-python generate_goldens.py --pdf-path "electronics-12-02175.pdf" --num-goldens 20
-python evaluate_rag.py --thread-id paper-001
+# Full pipeline: ingest + generate goldens + evaluate (same --thread-id throughout!)
+python pipeline/rag_pipeline.py ingest "electronics-12-02175.pdf" --thread-id paper-001
+python evaluation/generate_goldens.py --pdf-path "electronics-12-02175.pdf" --num-goldens 20
+python evaluation/evaluate_rag.py --thread-id paper-001
 
 # Fast debug run (single golden, hand-crafted)
-python evaluate_rag.py --dataset-path data/debug_golden.json --thread-id paper-001
+python evaluation/evaluate_rag.py --dataset-path data/debug_golden.json --thread-id paper-001
 
 # Pytest integration
-pytest tests/test_rag_eval.py -v
+pytest evaluation/tests/test_rag_eval.py -v
 ```
 
 ---
@@ -490,32 +493,35 @@ pytest tests/test_rag_eval.py -v
 
 ```
 my_rag/
-├── rag_pipeline.py          # Main entry point: ingest + query CLI
-├── evaluate_rag.py          # DeepEval evaluation runner
-├── generate_goldens.py      # Synthetic Q&A generation from PDF
+├── pipeline/
+│   └── rag_pipeline.py      # Main entry point (ingest / query CLI)
 │
-├── chunker2.py              # PDF → sentence-aware overlapping chunks
-├── ner_extractor.py         # spaCy + YAKE + Regex keyword extraction
-├── keyword_filter.py        # Frequency-based keyword pruning
-├── graph_builder2.py        # Neo4j graph builder (Chunk + Keyword nodes)
-├── graph_retriever2.py      # Scored retrieval + BFS neighborhood expansion
-├── groq_client.py           # Groq API: keyword extraction + answer generation
+├── ingestion/               # Phase 1: Knowledge Graph Construction
+│   ├── chunker2.py          # PDF → sentence-aware overlapping chunks
+│   ├── ner_extractor.py     # spaCy + YAKE + Regex keyword extraction
+│   ├── keyword_filter.py    # Frequency-based keyword pruning
+│   └── graph_builder2.py    # Neo4j graph writer
 │
-├── models/
-│   ├── groq_llm.py          # DeepEval LLM wrapper (GroqLlama3 with async+fallback)
-│   └── embedding_model.py   # DeepEval embedding wrapper (sentence-transformers)
+├── retriever/               # Phase 2a: Graph Traversal
+│   └── graph_retriever2.py  # BFS expansion & scoring
 │
-├── config.py                # All configuration constants and env vars
-├── docker-compose.yml       # Neo4j container
-├── requirements.txt         # Python dependencies
+├── generator/               # Phase 2b: Generation
+│   └── groq_client.py       # Groq API wrapper & model fallback
 │
-├── data/
-│   ├── kg_rag_synth_goldens.json   # Generated golden dataset
-│   ├── debug_golden.json           # Hand-crafted debug golden
-│   └── chunks.txt                  # Debug: last chunked output
+├── evaluation/              # Testing & Validation
+│   ├── evaluate_rag.py      # DeepEval metric runner
+│   ├── generate_goldens.py  # Synthetic Q&A generator
+│   ├── tests/               # Pytest test cases
+│   ├── legacy_main.py       # Legacy/debug entrypoint
+│   └── docs/                # Testing guides & DeepEval notes
 │
-└── tests/
-    └── test_rag_eval.py     # Pytest test suite
+├── models/                  # LLM & Embedding Model Wrappers
+│   ├── groq_llm.py          # AsyncGroq wrapper for DeepEval
+│   └── embedding_model.py   # SentenceTransformers wrapper
+│
+├── config.py                # Central configuration (env var mapping)
+├── requirements.txt         # Project dependencies
+└── .gitignore               # Build & secret exclusions
 ```
 
 ---

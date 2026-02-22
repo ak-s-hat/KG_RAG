@@ -1,4 +1,12 @@
 import os
+import sys
+from pathlib import Path
+
+# Add root directory to sys.path to allow running this script directly
+root_dir = str(Path(__file__).resolve().parent.parent)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 from groq import Groq, RateLimitError
 import time
 from config import GENERATION_MODELS
