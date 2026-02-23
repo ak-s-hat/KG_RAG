@@ -21,8 +21,8 @@ GEMINI_API_KEY=your_gemini_api_key_here
 # Neo4j (defaults shown - adjust if needed)
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USER=neo4j
-NEO4J_PASSWORD=hello-world
-NEO4J_DATABASE=neo4j
+NEO4J_PASSWORD=your-password
+NEO4J_DATABASE=whatever name you decide
 
 # Optional: Evaluation thread ID
 EVAL_THREAD_ID=eval-thread-default
@@ -44,7 +44,7 @@ docker ps
 **Check connection:**
 ```bash
 # Test Neo4j connection (optional)
-python -c "from neo4j import GraphDatabase; driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'hello-world')); driver.verify_connectivity(); print('✅ Neo4j connected')"
+python -c "from neo4j import GraphDatabase; driver = GraphDatabase.driver('bolt://localhost:7687', auth=('your_uid', 'your_password')); driver.verify_connectivity(); print('✅ Neo4j connected')"
 ```
 
 ### 3. ✅ Knowledge Graph Built
